@@ -58,9 +58,9 @@ class phand_test(tornado.web.RequestHandler):
             ymd = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             cmd = "nohup python {0} {1} >>/dev/null 2>&1 &".format(bin_path, iid)
             p = subprocess.Popen(cmd, cwd=cwd, shell=True)
-            status = yield self.query_task(iid)
-            if status == "0" or status == None:
-                return self.write(retcode + " timeout when exec")
+            rec = yield self.query_task(iid)
+            if rec["status"] == "0" or rec["status"] == None:
+                return self.write("{0} timeout when exec status<{1}>".format(retcode,rec["status"]))
             retcode = "0"
         except Exception as ex:
             message += str(ex)
@@ -82,8 +82,8 @@ class phand_test(tornado.web.RequestHandler):
         mclient = self.settings["mclient"]
         tasks = mclient.esb.tasks
         cur = yield tasks.find_one({"_id": task_id})
-        print(json.dumps(cur))
-        return cur["status"]
+        #print(json.dumps(cur))
+        return cur
 
 
 class phand_index(tornado.web.RequestHandler):
